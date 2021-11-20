@@ -1,0 +1,87 @@
+import sys
+from PyQt5.QtWidgets import *
+
+from PyQt5.QtGui import QFont
+
+class main(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.mark = "O"
+        self.setWindowTitle("틱택토")
+
+        self.menu = self.menuBar()
+        self.menu.addAction("시작", self.start)
+        self.menu.addAction("초기화", self.reset)
+
+        self.statusBar().showMessage("게임을 시작하려면 시작 버튼을 눌러주세요.")
+
+        self.grid = QGridLayout()
+        self.grid.setSpacing(1)
+        self.fnt = QFont()
+        self.fnt.setBold(True)
+        self.fnt.setPixelSize(50)
+
+        self.arr = []
+        self.win = []
+        self.sw = 0 #게임의 시작상태 저장, 비활성화 라는 뜻
+
+        for r in range(3):
+            self.arr.append([])
+            self.win.append([])
+            for c in range(3):
+                self.arr[r].append(QPushButton(""))
+                self.win[r].append("")
+                self.arr[r][c].setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                self.arr[r][c].setObjectName(str(r)+str(c))
+                self.arr[r][c].setFont(self.fnt)
+                self.arr[r][c].clicked.connect(self.chk)
+                self.grid.addWidget(self.arr[r][c], r, c)
+
+            w = QWidget()
+            w.setLayout(self.grid)
+            self.setCentralWidget(w)
+            self.setGeometry(2800, 500, 300, 300)
+            self.show()
+
+    def start(self):
+        self.sw = 1
+        self.reset()
+
+    def reset(self):
+        if self.sw == 1:
+            for r in range(3):
+                for c in range(3):
+                    self.arr[r][c].setText("")
+            self.mark = "O"
+
+    def chk(self):
+        if self.sw == 1:
+            e = self.sender()
+            if e.text() != "":
+                return
+            else:
+                e.setText(self.mark)
+                for r in range(3):
+                    for c in range(3):
+                        self.win[r][c] = self.arr[r][c].text()
+
+                for i in range(3):
+                    if self.mark * 3 == self.win[i][0]+self.win[i][1]+self.win[i][2] or \
+                            self.mark * 3 == self.win[0][i] + self.win[1][i] + self.win[2][i]:
+                        QMessageBox.about(self, "종료", self.mark + "가 이겼습니다!")
+                        self.sw = 0
+
+                if self.mark * 3 == self.win[0][0] + self.win[1][1] + self.win[2][2] or \
+                        self.mark * 3 == self.win[0][2] + self.win[1][1] + self.win[2][0]:
+                    QMessageBox.about(self, "종료", self.mark + "가 이겼습니다!")
+                    self.sw = 0
+
+                if self.mark == "O":
+                    self.mark = "X"
+                else:
+                    self.mark = "O"
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = main()
+    sys.exit(app.exec_())
